@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nutrition-toolkit"
+version = "0.2.0"
+description = "Tools for building nutrient profiles for foods that aren't in any database: deformulate a packaged food from its label, derive prepared foods via retention factors, and keep custom foods in sync with their source."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+keywords = ["nutrition", "food-composition", "recipe", "solver", "micronutrients", "fatty-acids"]
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+]
+
+[project.optional-dependencies]
+cli = ["pyyaml>=6.0"]
+
+[project.scripts]
+recipe-deformulate = "nutrition_toolkit.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.8.0",
+    "pyyaml>=6.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nutrition_toolkit"]
+
+[tool.ruff]
+line-length = 95

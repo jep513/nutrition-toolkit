@@ -1,0 +1,19 @@
+name: Calamari Pieces in Olive Oil (tin)
+basis_g: 80
+serving_g: 80
+respect_order: true
+total_mode: eq
+ingredients:
+  - name: Squid, Cooked
+    per_100g: {calories: 105, protein: 17.9, fat: 1.6, carbs: 3.5, sodium: 44, calcium: 37}
+  - name: olive oil
+    per_100g: {calories: 884, fat: 100.0, sodium: 2, vitamin_e: 14.35, oleic: 71.0}
+  - name: salt
+    per_100g: {sodium: 38758}
+label:
+  calories: 110
+  saturated: 1.0
+  protein: 17
+  fat: 4.5
+  sodium: 340
+  potassium: 100

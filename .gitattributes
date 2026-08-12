@@ -1,0 +1,3 @@
+# Normalize line endings so Windows and POSIX contributors don't produce
+# whole-file diffs. Text is stored LF in the repo; git checks out native.
+* text=auto eol=lf

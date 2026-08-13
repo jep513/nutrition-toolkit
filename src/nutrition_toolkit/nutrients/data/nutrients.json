@@ -1,0 +1,1135 @@
+{
+  "schema_version": 1,
+  "generated": "2026-08-13",
+  "sources": [
+    "Nutrient identity/unit/category seeded from a Cronometer account catalog (95 entries).",
+    "Ids below 1000 follow the USDA SR/FDC nutrient numbering that Cronometer adopted; VERIFY each against USDA FDC before relying on the correspondence.",
+    "Ids from 900001 are toolkit-assigned for nutrients with no settled USDA number."
+  ],
+  "energy": {
+    "terms": [
+      {
+        "id": 203,
+        "factor": 4.0
+      },
+      {
+        "id": 204,
+        "factor": 9.0
+      },
+      {
+        "id": 205,
+        "factor": 4.0
+      },
+      {
+        "id": 291,
+        "factor": -2.0
+      },
+      {
+        "id": 900007,
+        "factor": -1.6
+      },
+      {
+        "id": 221,
+        "factor": 7.0
+      }
+    ],
+    "note": "Atwater general factors. Carbohydrate is declared inclusive of fibre and sugar alcohols, so those carry corrections that land them at 2.0 and 2.4 kcal/g respectively."
+  },
+  "nutrients": [
+    {
+      "id": 203,
+      "name": "Protein",
+      "unit": "g",
+      "category": "protein",
+      "aliases": [
+        "protein"
+      ],
+      "mass_component": true
+    },
+    {
+      "id": 204,
+      "name": "Fat",
+      "unit": "g",
+      "category": "lipid",
+      "aliases": [
+        "fat",
+        "total_fat"
+      ],
+      "mass_component": true,
+      "carrier": true,
+      "note": "Saturated/mono/poly do not sum exactly to total fat (glycerol backbone, unmeasured fatty acids), so fat is measured, not derived."
+    },
+    {
+      "id": 205,
+      "name": "Carbs",
+      "unit": "g",
+      "category": "carbohydrate",
+      "aliases": [
+        "carbs",
+        "carbohydrate",
+        "total_carbohydrate"
+      ],
+      "mass_component": true
+    },
+    {
+      "id": 207,
+      "name": "Ash",
+      "unit": "g",
+      "category": "general",
+      "aliases": [
+        "ash"
+      ],
+      "mass_component": true
+    },
+    {
+      "id": 208,
+      "name": "Energy",
+      "unit": "kcal",
+      "category": "general",
+      "aliases": [
+        "calories",
+        "energy",
+        "kcal"
+      ]
+    },
+    {
+      "id": 209,
+      "name": "Starch",
+      "unit": "g",
+      "category": "carbohydrate",
+      "aliases": [
+        "starch"
+      ],
+      "contributes_to": [
+        {
+          "id": 205,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 210,
+      "name": "Sucrose",
+      "unit": "g",
+      "category": "carbohydrate",
+      "contributes_to": [
+        {
+          "id": 269,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 211,
+      "name": "Glucose",
+      "unit": "g",
+      "category": "carbohydrate",
+      "contributes_to": [
+        {
+          "id": 269,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 212,
+      "name": "Fructose",
+      "unit": "g",
+      "category": "carbohydrate",
+      "contributes_to": [
+        {
+          "id": 269,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 213,
+      "name": "Lactose",
+      "unit": "g",
+      "category": "carbohydrate",
+      "contributes_to": [
+        {
+          "id": 269,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 214,
+      "name": "Maltose",
+      "unit": "g",
+      "category": "carbohydrate",
+      "contributes_to": [
+        {
+          "id": 269,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 221,
+      "name": "Alcohol",
+      "unit": "g",
+      "category": "general",
+      "aliases": [
+        "alcohol",
+        "ethanol"
+      ],
+      "mass_component": true
+    },
+    {
+      "id": 246,
+      "name": "Phytate",
+      "unit": "mg",
+      "category": "general",
+      "aliases": [
+        "phytate"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 255,
+      "name": "Water",
+      "unit": "g",
+      "category": "general",
+      "aliases": [
+        "water",
+        "moisture"
+      ],
+      "mass_component": true,
+      "note": "Water is a mass component and the basis for reduction/rehydration."
+    },
+    {
+      "id": 262,
+      "name": "Caffeine",
+      "unit": "mg",
+      "category": "general",
+      "aliases": [
+        "caffeine"
+      ]
+    },
+    {
+      "id": 269,
+      "name": "Sugars",
+      "unit": "g",
+      "category": "carbohydrate",
+      "aliases": [
+        "sugars",
+        "sugar"
+      ],
+      "contributes_to": [
+        {
+          "id": 205,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 287,
+      "name": "Galactose",
+      "unit": "g",
+      "category": "carbohydrate",
+      "contributes_to": [
+        {
+          "id": 269,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 291,
+      "name": "Fiber",
+      "unit": "g",
+      "category": "carbohydrate",
+      "aliases": [
+        "fiber",
+        "fibre",
+        "dietary_fiber"
+      ],
+      "contributes_to": [
+        {
+          "id": 205,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 295,
+      "name": "Soluble Fiber",
+      "unit": "g",
+      "category": "carbohydrate",
+      "aliases": [
+        "soluble_fiber"
+      ],
+      "contributes_to": [
+        {
+          "id": 291,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 297,
+      "name": "Insoluble Fiber",
+      "unit": "g",
+      "category": "carbohydrate",
+      "aliases": [
+        "insoluble_fiber"
+      ],
+      "contributes_to": [
+        {
+          "id": 291,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 301,
+      "name": "Calcium",
+      "unit": "mg",
+      "category": "mineral",
+      "aliases": [
+        "calcium"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 303,
+      "name": "Iron",
+      "unit": "mg",
+      "category": "mineral",
+      "aliases": [
+        "iron"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 304,
+      "name": "Magnesium",
+      "unit": "mg",
+      "category": "mineral",
+      "aliases": [
+        "magnesium"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 305,
+      "name": "Phosphorus",
+      "unit": "mg",
+      "category": "mineral",
+      "aliases": [
+        "phosphorus"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 306,
+      "name": "Potassium",
+      "unit": "mg",
+      "category": "mineral",
+      "aliases": [
+        "potassium"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 307,
+      "name": "Sodium",
+      "unit": "mg",
+      "category": "mineral",
+      "aliases": [
+        "sodium"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 309,
+      "name": "Zinc",
+      "unit": "mg",
+      "category": "mineral",
+      "aliases": [
+        "zinc"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 312,
+      "name": "Copper",
+      "unit": "mg",
+      "category": "mineral",
+      "aliases": [
+        "copper"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 313,
+      "name": "Fluoride",
+      "unit": "ug",
+      "category": "mineral",
+      "aliases": [
+        "fluoride"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 315,
+      "name": "Manganese",
+      "unit": "mg",
+      "category": "mineral",
+      "aliases": [
+        "manganese"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 317,
+      "name": "Selenium",
+      "unit": "ug",
+      "category": "mineral",
+      "aliases": [
+        "selenium"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 319,
+      "name": "Retinol",
+      "unit": "ug",
+      "category": "vitamin",
+      "aliases": [
+        "retinol"
+      ],
+      "solubility": "fat",
+      "contributes_to": [
+        {
+          "id": 320,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 320,
+      "name": "Vitamin A",
+      "unit": "ug",
+      "category": "vitamin",
+      "aliases": [
+        "vitamin_a"
+      ],
+      "solubility": "fat",
+      "derived": true,
+      "alt_units": {
+        "IU": {
+          "ambiguous": "IU->ug RAE depends on the source form (retinol vs provitamin-A carotenoids); no single factor applies."
+        }
+      },
+      "note": "Retinol Activity Equivalents."
+    },
+    {
+      "id": 321,
+      "name": "Beta-carotene",
+      "unit": "ug",
+      "category": "carotenoid",
+      "aliases": [
+        "beta_carotene"
+      ],
+      "solubility": "fat",
+      "contributes_to": [
+        {
+          "id": 320,
+          "factor": 0.0833333
+        }
+      ]
+    },
+    {
+      "id": 322,
+      "name": "Alpha-carotene",
+      "unit": "ug",
+      "category": "carotenoid",
+      "aliases": [
+        "alpha_carotene"
+      ],
+      "solubility": "fat",
+      "contributes_to": [
+        {
+          "id": 320,
+          "factor": 0.0416667
+        }
+      ]
+    },
+    {
+      "id": 323,
+      "name": "Vitamin E",
+      "unit": "mg",
+      "category": "vitamin",
+      "aliases": [
+        "vitamin_e"
+      ],
+      "solubility": "fat",
+      "alt_units": {
+        "IU": {
+          "ambiguous": "1 IU = 0.67 mg natural (d-alpha-tocopherol) vs 0.45 mg synthetic (dl-alpha); requires knowing the form."
+        }
+      }
+    },
+    {
+      "id": 324,
+      "name": "Vitamin D",
+      "unit": "ug",
+      "category": "vitamin",
+      "aliases": [
+        "vitamin_d"
+      ],
+      "solubility": "fat",
+      "alt_units": {
+        "IU": {
+          "per_canonical": 40.0
+        }
+      },
+      "external_ids": {
+        "cronometer": {
+          "id": 324,
+          "unit": "IU"
+        }
+      }
+    },
+    {
+      "id": 334,
+      "name": "Beta-cryptoxanthin",
+      "unit": "ug",
+      "category": "carotenoid",
+      "aliases": [
+        "beta_cryptoxanthin"
+      ],
+      "solubility": "fat",
+      "contributes_to": [
+        {
+          "id": 320,
+          "factor": 0.0416667
+        }
+      ]
+    },
+    {
+      "id": 337,
+      "name": "Lycopene",
+      "unit": "ug",
+      "category": "carotenoid",
+      "aliases": [
+        "lycopene"
+      ],
+      "solubility": "fat",
+      "note": "No provitamin A activity -- carries no contributes_to, so removing it does not change vitamin A."
+    },
+    {
+      "id": 338,
+      "name": "Lutein+Zeaxanthin",
+      "unit": "ug",
+      "category": "carotenoid",
+      "aliases": [
+        "lutein_zeaxanthin"
+      ],
+      "solubility": "fat",
+      "note": "No provitamin A activity."
+    },
+    {
+      "id": 341,
+      "name": "Beta Tocopherol",
+      "unit": "mg",
+      "category": "vitamin",
+      "solubility": "fat",
+      "note": "Beta/gamma/delta tocopherols carry no vitamin E activity under the current definition -- only alpha-tocopherol counts toward id 323."
+    },
+    {
+      "id": 342,
+      "name": "Gamma Tocopherol",
+      "unit": "mg",
+      "category": "vitamin",
+      "solubility": "fat"
+    },
+    {
+      "id": 343,
+      "name": "Delta Tocopherol",
+      "unit": "mg",
+      "category": "vitamin",
+      "solubility": "fat"
+    },
+    {
+      "id": 401,
+      "name": "Vitamin C",
+      "unit": "mg",
+      "category": "vitamin",
+      "aliases": [
+        "vitamin_c"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 404,
+      "name": "B1 (Thiamine)",
+      "unit": "mg",
+      "category": "vitamin",
+      "aliases": [
+        "thiamine",
+        "b1"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 405,
+      "name": "B2 (Riboflavin)",
+      "unit": "mg",
+      "category": "vitamin",
+      "aliases": [
+        "riboflavin",
+        "b2"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 406,
+      "name": "B3 (Niacin)",
+      "unit": "mg",
+      "category": "vitamin",
+      "aliases": [
+        "niacin",
+        "b3"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 410,
+      "name": "B5 (Pantothenic Acid)",
+      "unit": "mg",
+      "category": "vitamin",
+      "aliases": [
+        "pantothenic_acid",
+        "b5"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 415,
+      "name": "B6 (Pyridoxine)",
+      "unit": "mg",
+      "category": "vitamin",
+      "aliases": [
+        "pyridoxine",
+        "b6"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 417,
+      "name": "Folate",
+      "unit": "ug",
+      "category": "vitamin",
+      "aliases": [
+        "folate"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 418,
+      "name": "B12 (Cobalamin)",
+      "unit": "ug",
+      "category": "vitamin",
+      "aliases": [
+        "cobalamin",
+        "b12"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 421,
+      "name": "Choline",
+      "unit": "mg",
+      "category": "vitamin",
+      "aliases": [
+        "choline"
+      ],
+      "solubility": "water"
+    },
+    {
+      "id": 430,
+      "name": "Vitamin K",
+      "unit": "ug",
+      "category": "vitamin",
+      "aliases": [
+        "vitamin_k"
+      ],
+      "solubility": "fat"
+    },
+    {
+      "id": 501,
+      "name": "Tryptophan",
+      "unit": "g",
+      "category": "amino_acid",
+      "note": "Amino acids do not sum exactly to protein (nitrogen x factor), so they carry no contributes_to."
+    },
+    {
+      "id": 502,
+      "name": "Threonine",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 503,
+      "name": "Isoleucine",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 504,
+      "name": "Leucine",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 505,
+      "name": "Lysine",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 506,
+      "name": "Methionine",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 507,
+      "name": "Cystine",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 508,
+      "name": "Phenylalanine",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 509,
+      "name": "Tyrosine",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 510,
+      "name": "Valine",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 511,
+      "name": "Arginine",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 512,
+      "name": "Histidine",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 513,
+      "name": "Alanine",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 514,
+      "name": "Aspartic acid",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 515,
+      "name": "Glutamic acid",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 516,
+      "name": "Glycine",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 517,
+      "name": "Proline",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 518,
+      "name": "Serine",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 521,
+      "name": "Hydroxyproline",
+      "unit": "g",
+      "category": "amino_acid"
+    },
+    {
+      "id": 601,
+      "name": "Cholesterol",
+      "unit": "mg",
+      "category": "lipid",
+      "aliases": [
+        "cholesterol"
+      ],
+      "solubility": "fat"
+    },
+    {
+      "id": 605,
+      "name": "Trans-Fats",
+      "unit": "g",
+      "category": "lipid",
+      "aliases": [
+        "trans_fat"
+      ],
+      "solubility": "fat",
+      "contributes_to": [
+        {
+          "id": 204,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 606,
+      "name": "Saturated",
+      "unit": "g",
+      "category": "lipid",
+      "aliases": [
+        "saturated_fat",
+        "saturated"
+      ],
+      "solubility": "fat",
+      "contributes_to": [
+        {
+          "id": 204,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 621,
+      "name": "DHA",
+      "unit": "g",
+      "category": "lipid",
+      "aliases": [
+        "dha"
+      ],
+      "solubility": "fat",
+      "contributes_to": [
+        {
+          "id": 900002,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 629,
+      "name": "EPA",
+      "unit": "g",
+      "category": "lipid",
+      "aliases": [
+        "epa"
+      ],
+      "solubility": "fat",
+      "contributes_to": [
+        {
+          "id": 900002,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 636,
+      "name": "Phytosterol",
+      "unit": "mg",
+      "category": "lipid",
+      "aliases": [
+        "phytosterol"
+      ],
+      "solubility": "fat"
+    },
+    {
+      "id": 645,
+      "name": "Monounsaturated",
+      "unit": "g",
+      "category": "lipid",
+      "aliases": [
+        "monounsaturated",
+        "mufa"
+      ],
+      "solubility": "fat",
+      "contributes_to": [
+        {
+          "id": 204,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 646,
+      "name": "Polyunsaturated",
+      "unit": "g",
+      "category": "lipid",
+      "aliases": [
+        "polyunsaturated",
+        "pufa"
+      ],
+      "solubility": "fat",
+      "contributes_to": [
+        {
+          "id": 204,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 675,
+      "name": "LA",
+      "unit": "g",
+      "category": "lipid",
+      "aliases": [
+        "la",
+        "linoleic_acid"
+      ],
+      "solubility": "fat",
+      "contributes_to": [
+        {
+          "id": 900003,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 851,
+      "name": "ALA",
+      "unit": "g",
+      "category": "lipid",
+      "aliases": [
+        "ala",
+        "alpha_linolenic_acid"
+      ],
+      "solubility": "fat",
+      "contributes_to": [
+        {
+          "id": 900002,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 853,
+      "name": "AA",
+      "unit": "g",
+      "category": "lipid",
+      "aliases": [
+        "aa",
+        "arachidonic_acid"
+      ],
+      "solubility": "fat",
+      "contributes_to": [
+        {
+          "id": 900003,
+          "factor": 1.0
+        }
+      ]
+    },
+    {
+      "id": 900001,
+      "name": "Net Carbs",
+      "unit": "g",
+      "category": "derived",
+      "aliases": [
+        "net_carbs"
+      ],
+      "derived": true,
+      "formula": "205 - 291 - 900007",
+      "external_ids": {
+        "cronometer": {
+          "id": -1205
+        }
+      }
+    },
+    {
+      "id": 900002,
+      "name": "Omega-3",
+      "unit": "g",
+      "category": "lipid",
+      "aliases": [
+        "omega_3"
+      ],
+      "solubility": "fat",
+      "external_ids": {
+        "cronometer": {
+          "id": 10001
+        }
+      },
+      "note": "Lower bound: only the listed contributors are tracked; other n-3 fatty acids (DPA, SDA) are not."
+    },
+    {
+      "id": 900003,
+      "name": "Omega-6",
+      "unit": "g",
+      "category": "lipid",
+      "aliases": [
+        "omega_6"
+      ],
+      "solubility": "fat",
+      "external_ids": {
+        "cronometer": {
+          "id": 10002
+        }
+      }
+    },
+    {
+      "id": 900004,
+      "name": "Chromium",
+      "unit": "ug",
+      "category": "mineral",
+      "aliases": [
+        "chromium"
+      ],
+      "solubility": "water",
+      "external_ids": {
+        "cronometer": {
+          "id": 10003
+        }
+      }
+    },
+    {
+      "id": 900005,
+      "name": "Biotin",
+      "unit": "ug",
+      "category": "vitamin",
+      "aliases": [
+        "biotin"
+      ],
+      "solubility": "water",
+      "external_ids": {
+        "cronometer": {
+          "id": 10004
+        }
+      }
+    },
+    {
+      "id": 900006,
+      "name": "Iodine",
+      "unit": "ug",
+      "category": "mineral",
+      "aliases": [
+        "iodine"
+      ],
+      "solubility": "water",
+      "external_ids": {
+        "cronometer": {
+          "id": 10005
+        }
+      }
+    },
+    {
+      "id": 900007,
+      "name": "Sugar Alcohol",
+      "unit": "g",
+      "category": "carbohydrate",
+      "aliases": [
+        "sugar_alcohol"
+      ],
+      "external_ids": {
+        "cronometer": {
+          "id": 10007
+        }
+      }
+    },
+    {
+      "id": 900008,
+      "name": "Molybdenum",
+      "unit": "ug",
+      "category": "mineral",
+      "aliases": [
+        "molybdenum"
+      ],
+      "solubility": "water",
+      "external_ids": {
+        "cronometer": {
+          "id": 10008
+        }
+      }
+    },
+    {
+      "id": 900009,
+      "name": "Added Sugars",
+      "unit": "g",
+      "category": "carbohydrate",
+      "aliases": [
+        "added_sugars"
+      ],
+      "contributes_to": [
+        {
+          "id": 269,
+          "factor": 1.0
+        }
+      ],
+      "external_ids": {
+        "cronometer": {
+          "id": 10009
+        }
+      }
+    },
+    {
+      "id": 900010,
+      "name": "Allulose",
+      "unit": "g",
+      "category": "carbohydrate",
+      "aliases": [
+        "allulose"
+      ],
+      "external_ids": {
+        "cronometer": {
+          "id": 10010
+        }
+      }
+    },
+    {
+      "id": 900011,
+      "name": "Beta-Hydroxybutyrate",
+      "unit": "g",
+      "category": "general",
+      "aliases": [
+        "beta_hydroxybutyrate",
+        "bhb"
+      ],
+      "external_ids": {
+        "cronometer": {
+          "id": 10011
+        }
+      }
+    },
+    {
+      "id": 900012,
+      "name": "Oxalate",
+      "unit": "mg",
+      "category": "general",
+      "aliases": [
+        "oxalate"
+      ],
+      "solubility": "water",
+      "external_ids": {
+        "cronometer": {
+          "id": 10012
+        }
+      }
+    }
+  ]
+}

@@ -9,14 +9,25 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from .cronometer import to_cronometer_custom_food
+from .cronometer import (
+    from_cronometer_food,
+    to_cronometer_custom_food,
+    to_cronometer_nutrients,
+)
 
 ADAPTERS: dict[str, Callable[..., dict]] = {
     "cronometer": to_cronometer_custom_food,
 }
 DEFAULT_ADAPTER = "cronometer"
 
-__all__ = ["ADAPTERS", "DEFAULT_ADAPTER", "get_adapter", "to_cronometer_custom_food"]
+__all__ = [
+    "ADAPTERS",
+    "DEFAULT_ADAPTER",
+    "from_cronometer_food",
+    "get_adapter",
+    "to_cronometer_custom_food",
+    "to_cronometer_nutrients",
+]
 
 
 def get_adapter(name: str) -> Callable[..., dict]:

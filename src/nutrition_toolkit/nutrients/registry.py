@@ -103,6 +103,38 @@ class Registry:
         nutrient = self.get(key)
         return nutrient.id if nutrient else None
 
+    def resolve_mapping(self, values: Mapping[int | str, float]) -> dict[int, float]:
+        """Resolve a name/alias/id keyed mapping onto canonical ids.
+
+        Strict on names, lenient on ids. An unrecognised *name* in something a
+        human wrote is a typo or an unsupported nutrient, and failing with a
+        suggestion beats carrying a key nothing can interpret. An unrecognised
+        *id* is a database that grew a nutrient, which is a normal condition --
+        see NutrientVector.
+        """
+        resolved: dict[int, float] = {}
+        unknown: list[str] = []
+        for key, amount in values.items():
+            if isinstance(key, int):
+                resolved[key] = float(amount)
+                continue
+            nid = self.resolve_id(key)
+            if nid is None:
+                unknown.append(key)
+            else:
+                resolved[nid] = float(amount)
+        if unknown:
+            raise KeyError(
+                "unknown nutrient name(s): "
+                + ", ".join(f"{n!r}{_suggest(n, self._by_key)}" for n in sorted(unknown))
+            )
+        return resolved
+
+    def name_for(self, nutrient_id: int) -> str:
+        """Display name for an id, falling back to the bare id when unknown."""
+        nutrient = self._by_id.get(nutrient_id)
+        return nutrient.name if nutrient else f"#{nutrient_id}"
+
     def contributors_to(self, nutrient_id: int) -> tuple[Contribution, ...]:
         """Nutrients that feed into `nutrient_id`, with their factors."""
         return tuple(self._contributors.get(nutrient_id, ()))
@@ -169,6 +201,14 @@ class Registry:
 
 def _normalize(key: str) -> str:
     return key.strip().lower().replace(" ", "_").replace("-", "_")
+
+
+def _suggest(key: str, known: Mapping[str, int]) -> str:
+    """' (did you mean ...)' for a near miss, or '' when nothing is close."""
+    import difflib
+
+    close = difflib.get_close_matches(_normalize(key), known, n=2, cutoff=0.75)
+    return f" (did you mean {' or '.join(repr(c) for c in close)}?)" if close else ""
 
 
 def _parse_nutrient(raw: Mapping[str, object]) -> Nutrient:

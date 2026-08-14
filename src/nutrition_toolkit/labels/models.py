@@ -15,14 +15,16 @@ class Label:
     """The printed nutrition panel for a known basis mass.
 
     `values`  : nutrient -> printed amount, in the units the panel uses
-                (kcal, g, mg). Keys must match the ingredient nutrient keys.
+                (kcal, g, mg). Keys may be canonical nutrient ids, registry
+                names, or aliases -- the regime resolves them when the panel is
+                read, since that mapping is jurisdiction-specific.
     `basis_g` : the mass the panel describes. For a US panel this is the
                 serving or container weight; EU panels are always per 100 g.
                 For a can, usually the net or drained weight (whichever the
                 ingredients actually sum to). If None, total mass is left free.
     """
 
-    values: dict[str, float]
+    values: dict[int | str, float]
     basis_g: float | None = None
 
 
@@ -30,7 +32,7 @@ class Label:
 class PanelReading:
     """A panel translated into solver constraints.
 
-    `intervals`    : nutrient -> (low, high) true-value bounds.
+    `intervals`    : canonical nutrient id -> (low, high) true-value bounds.
     `basis_g`      : the basis mass, carried through from the label.
     `derived_keys` : nutrients computed from other declared nutrients (energy
                      from the macros). Fitting these fights their own rounding,
@@ -39,7 +41,7 @@ class PanelReading:
                      misread regime is visible rather than silent.
     """
 
-    intervals: dict[str, tuple[float, float]]
+    intervals: dict[int, tuple[float, float]]
     basis_g: float | None = None
-    derived_keys: frozenset[str] = frozenset()
+    derived_keys: frozenset[int] = frozenset()
     notes: list[str] = field(default_factory=list)

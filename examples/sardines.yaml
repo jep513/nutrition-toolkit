@@ -5,9 +5,9 @@ respect_order: true
 total_mode: eq
 ingredients:
   - name: sardines (raw)
-    per_100g: {calories: 208, protein: 24.6, fat: 11.5, carbs: 0.0, sodium: 90, calcium: 46, vitamin_d_iu: 193, epa: 0.47, dha: 0.51}
+    per_100g: {calories: 208, protein: 24.6, fat: 11.5, carbs: 0.0, sodium: 90, calcium: 46, vitamin_d: 4.825, epa: 0.47, dha: 0.51}
   - name: olive oil
-    per_100g: {calories: 884, fat: 100.0, sodium: 2, vitamin_e: 14.35, oleic: 71.0}
+    per_100g: {calories: 884, fat: 100.0, sodium: 2, vitamin_e: 14.35, monounsaturated: 71.0}
   - name: salt
     per_100g: {sodium: 38758}
 label:

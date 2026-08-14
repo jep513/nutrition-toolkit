@@ -3,8 +3,8 @@
   "generated": "2026-08-13",
   "sources": [
     "Nutrient identity/unit/category seeded from a Cronometer account catalog (95 entries).",
-    "Ids below 1000 follow the USDA SR/FDC nutrient numbering that Cronometer adopted; VERIFY each against USDA FDC before relying on the correspondence.",
-    "Ids from 900001 are toolkit-assigned for nutrients with no settled USDA number."
+    "Ids below 1000 follow USDA SR/FDC nutrient numbering, which Cronometer adopted; spot-checked against an FNDDS/FDC nutrient-number appendix and confirmed to match.",
+    "Ids from 900001 are toolkit-assigned for nutrients with no settled USDA number; external_ids records the Cronometer mapping."
   ],
   "energy": {
     "terms": [

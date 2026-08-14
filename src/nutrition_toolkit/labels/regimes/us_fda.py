@@ -1,52 +1,27 @@
 """United States: 21 CFR 101.9 label rounding, inverted.
 
 A printed label value is a rounded figure. Given the printed number we recover
-the half-open interval of true amounts that would round to it, so a solver can
-treat the panel as constraints of the form  low <= amount <= high  rather than
-brittle equalities.
+the interval of true amounts that would round to it, so a solver can treat the
+panel as constraints of the form  low <= amount <= high  rather than brittle
+equalities.
 
-US panels are declared per serving (and per container), carbohydrate is
-*inclusive* of fibre, and sodium is declared as sodium in mg -- all three
-differ under other regimes, which is why this lives behind `Regime`.
+US panels declare per serving (and per container), carbohydrate *inclusive* of
+fibre, and sodium as sodium in mg. All three differ under other regimes, which
+is why this lives behind `Regime`.
 
-Nutrient class is currently inferred from the key name. That is a stopgap:
-once nutrients are keyed by canonical ID, class comes from the nutrient
-registry instead and the substring matching goes away.
+Rounding class comes from the nutrient's canonical unit rather than its name --
+the registry already knows that sodium is mg and folate is ug, so there's no
+need to pattern-match strings and no way for an unrecognised name to fall
+through to a default without anyone noticing.
 """
 
 from __future__ import annotations
 
-# Substrings -> rounding class. First match wins; extend freely.
-_ENERGY = ("calorie", "energy", "kcal")
-_GRAM_MACRO = (
-    "protein",
-    "fat",
-    "carb",
-    "fiber",
-    "fibre",
-    "sugar",
-    "starch",
-    "saturated",
-    "trans",
-    "monounsat",
-    "polyunsat",
-    "omega",
-    "epa",
-    "dha",
-    "ala",
-    "linoleic",
-    "oleic",
-)
-_MG_MINERAL = (
-    "sodium",
-    "potassium",
-    "calcium",
-    "cholesterol",
-    "magnesium",
-    "phosphorus",
-    "iron",
-    "zinc",
-)
+from collections.abc import Mapping
+
+from ...nutrients import Nutrient, Registry
+
+ENERGY_ID = 208
 
 
 class USFDARegime:
@@ -58,20 +33,34 @@ class USFDARegime:
         # Fallback tolerance for nutrients with no explicit rule below.
         self.rel_tol = rel_tol
 
-    def classify(self, nutrient: str) -> str:
-        n = nutrient.lower()
-        if any(k in n for k in _ENERGY):
+    def normalize_declared(
+        self, values: Mapping[int | str, float], registry: Registry
+    ) -> tuple[dict[int, float], list[str]]:
+        """US declarations map straight onto canonical nutrients.
+
+        Sodium is already sodium, and carbohydrate is already fibre-inclusive
+        like the registry, so nothing needs converting. EU will not be this
+        lucky.
+        """
+        return registry.resolve_mapping(values), []
+
+    def classify(self, nutrient: Nutrient | None) -> str:
+        if nutrient is None:
+            return "generic"
+        if nutrient.id == ENERGY_ID:
             return "energy"
-        if any(k in n for k in _MG_MINERAL):
-            return "mg_mineral"
-        if any(k in n for k in _GRAM_MACRO):
+        if nutrient.unit == "g":
             return "gram_macro"
+        if nutrient.unit == "mg":
+            return "mg_mineral"
+        # ug and IU nutrients (folate, vitamin K, D) have their own increments
+        # under 101.9 that aren't encoded here yet; they take the generic band.
         return "generic"
 
-    def is_derived(self, nutrient: str) -> bool:
-        return self.classify(nutrient) == "energy"
+    def is_derived(self, nutrient: Nutrient | None) -> bool:
+        return nutrient is not None and nutrient.id == ENERGY_ID
 
-    def interval(self, nutrient: str, printed: float) -> tuple[float, float]:
+    def interval(self, nutrient: Nutrient | None, printed: float) -> tuple[float, float]:
         cls = self.classify(nutrient)
         v = float(printed)
 

@@ -1,27 +1,62 @@
+import pytest
+
 from nutrition_toolkit import Ingredient, Label, solve_label
 from nutrition_toolkit.labels import US_FDA, read_panel
+from nutrition_toolkit.nutrients import load_registry
 from nutrition_toolkit.recipe_deformulation import solve
+
+REG = load_registry()
+
+ENERGY, PROTEIN, FAT, CARBS = 208, 203, 205, 205
+SODIUM, CALCIUM = 307, 301
+EPA, VITAMIN_D, MUFA = 629, 324, 645
 
 
 def test_label_interval_inversion():
     # protein 22 g uses the >5 g rule (nearest 1 g) -> [21.5, 22.5]
-    assert US_FDA.interval("protein", 22) == (21.5, 22.5)
+    assert US_FDA.interval(REG["protein"], 22) == (21.5, 22.5)
     # sodium 550 mg uses the >140 rule (nearest 10) -> [545, 555]
-    assert US_FDA.interval("sodium", 550) == (545.0, 555.0)
+    assert US_FDA.interval(REG["sodium"], 550) == (545.0, 555.0)
     # small fat 3 g uses the <=5 rule (nearest 0.5) -> [2.75, 3.25]
-    assert US_FDA.interval("fat", 3) == (2.75, 3.25)
+    assert US_FDA.interval(REG["fat"], 3) == (2.75, 3.25)
     # calories 380 -> nearest 10 -> [375, 385]
-    assert US_FDA.interval("calories", 380) == (375.0, 385.0)
+    assert US_FDA.interval(REG["calories"], 380) == (375.0, 385.0)
 
 
-def test_read_panel_marks_energy_derived():
-    """Energy is flagged so callers can keep it out of the fit and use it as a
-    cross-check; the macros are not."""
+def test_rounding_class_comes_from_the_unit_not_the_name():
+    """Registry-driven classification: sodium is mg because the registry says
+    so, not because the string contains 'sodium'."""
+    assert US_FDA.classify(REG["sodium"]) == "mg_mineral"
+    assert US_FDA.classify(REG["cholesterol"]) == "mg_mineral"  # mg, not a mineral
+    assert US_FDA.classify(REG["protein"]) == "gram_macro"
+    assert US_FDA.classify(REG["calories"]) == "energy"
+    # ug nutrients have their own 101.9 increments, not yet encoded
+    assert US_FDA.classify(REG["folate"]) == "generic"
+    assert US_FDA.classify(None) == "generic"
+
+
+def test_read_panel_resolves_names_to_ids():
     reading = read_panel(Label({"calories": 380, "protein": 22}, basis_g=113))
 
-    assert reading.derived_keys == frozenset({"calories"})
-    assert reading.intervals["protein"] == (21.5, 22.5)
+    assert reading.intervals[PROTEIN] == (21.5, 22.5)
+    assert reading.derived_keys == frozenset({ENERGY})
     assert reading.basis_g == 113
+    assert any("us_fda" in n for n in reading.notes)
+
+
+def test_panel_accepts_ids_directly():
+    by_name = read_panel(Label({"protein": 22}, basis_g=100))
+    by_id = read_panel(Label({PROTEIN: 22}, basis_g=100))
+
+    assert by_name.intervals == by_id.intervals
+
+
+def test_unknown_nutrient_name_raises_with_a_suggestion():
+    with pytest.raises(KeyError, match="proteinn"):
+        read_panel(Label({"proteinn": 22}, basis_g=100))
+
+    with pytest.raises(KeyError, match="did you mean"):
+        Ingredient("typo", {"stodium": 90})
 
 
 def test_roundtrip_recovery_within_ranges():
@@ -33,9 +68,9 @@ def test_roundtrip_recovery_within_ranges():
     basis = sum(true.values())
 
     panel = {}
-    for nut, step in (("protein", 1), ("fat", 1), ("sodium", 10)):
-        v = sum(i.per_100g.get(nut, 0) * true[i.name] / 100 for i in ings)
-        panel[nut] = round(v / step) * step
+    for nid, step in ((PROTEIN, 1), (FAT, 1), (SODIUM, 10)):
+        v = sum(i.amount(nid, true[i.name]) for i in ings)
+        panel[nid] = round(v / step) * step
 
     sol = solve_label(ings, Label(panel, basis_g=basis), respect_order=True, total_mode="eq")
     assert sol.feasible
@@ -56,8 +91,34 @@ def test_reconstructs_unlabelled_nutrients():
         total_mode="eq",
     )
     # epa only comes from ingredient a; it must appear in the reconstruction
-    assert "epa" in sol.reconstructed
-    assert sol.reconstructed["epa"] > 0
+    assert EPA in sol.reconstructed
+    assert sol.reconstructed[EPA] > 0
+
+
+def test_reconstruction_is_a_nutrient_vector_on_the_solved_basis():
+    """The output is a profile the derive/ tools can consume directly, with the
+    basis set to the solved total mass rather than assumed to be 100 g."""
+    a = Ingredient("a", {"protein": 20})
+    b = Ingredient("b", {"fat": 100})
+
+    sol = solve_label(
+        [a, b], Label({"protein": 10, "fat": 50}, basis_g=100), respect_order=False
+    )
+
+    assert sol.reconstructed.basis_g == pytest.approx(100.0, abs=1.0)
+    per_100g = sol.reconstructed.rebased(100.0)
+    assert per_100g[PROTEIN] == pytest.approx(10.0, abs=0.5)
+
+
+def test_named_views_are_available_for_humans():
+    sol = solve_label(
+        [Ingredient("a", {"protein": 20})],
+        Label({"protein": 10}, basis_g=50),
+        respect_order=False,
+    )
+
+    assert "Protein" in sol.reconstructed_named()
+    assert "Protein" in sol.residuals_named()
 
 
 def test_infeasible_flags_culprit():
@@ -71,7 +132,7 @@ def test_infeasible_flags_culprit():
         total_mode="eq",
     )
     assert not sol.feasible
-    assert abs(sol.residuals["sodium"]) > 0
+    assert abs(sol.residuals[SODIUM]) > 0
 
 
 # ---------------------------------------------------------------------------
@@ -87,7 +148,7 @@ def test_solve_accepts_bare_intervals():
 
     sol = solve(
         [a, b],
-        {"protein": (9.5, 10.5), "fat": (49.5, 50.5)},
+        {PROTEIN: (9.5, 10.5), FAT: (49.5, 50.5)},
         basis_g=100,
         respect_order=False,
     )
@@ -102,13 +163,11 @@ def test_excluded_nutrient_still_reports_residual():
     a cross-check rather than dead weight."""
     a = Ingredient("a", {"protein": 20, "calories": 80})
     b = Ingredient("b", {"fat": 100, "calories": 900})
-    label = Label(
-        {"protein": 10, "fat": 50, "calories": 9999}, basis_g=100
-    )  # energy wildly wrong
+    label = Label({"protein": 10, "fat": 50, "calories": 9999}, basis_g=100)
 
     sol = solve_label([a, b], label, respect_order=False, total_mode="eq")
 
     # The impossible energy figure did not make the macro fit infeasible...
     assert sol.feasible
     # ...but it is reported, and badly missed.
-    assert abs(sol.residuals["calories"]) > 1000
+    assert abs(sol.residuals[ENERGY]) > 1000

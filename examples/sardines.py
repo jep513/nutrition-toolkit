@@ -12,16 +12,19 @@ carried micros/fatty acids are the same ones Cronometer will show.
 """
 from nutrition_toolkit import Ingredient, Label, solve_label, to_cronometer_custom_food
 from nutrition_toolkit.labels import US_FDA
+from nutrition_toolkit.nutrients import load_registry
+
+REG = load_registry()
 
 # --- per-100 g profiles (illustrative) --------------------------------------
 sardine = Ingredient("sardines (raw)", {
     "calories": 208, "protein": 24.6, "fat": 11.5, "carbs": 0.0, "sodium": 90,
     # micros / fatty acids the label never prints but Cronometer tracks:
-    "calcium": 46, "vitamin_d_iu": 193, "epa": 0.47, "dha": 0.51,
+    "calcium": 46, "vitamin_d": 4.825, "epa": 0.47, "dha": 0.51,
 })
 olive_oil = Ingredient("olive oil", {
     "calories": 884, "protein": 0.0, "fat": 100.0, "carbs": 0.0, "sodium": 2,
-    "vitamin_e": 14.35, "oleic": 71.0,
+    "vitamin_e": 14.35, "monounsaturated": 71.0,
 })
 salt = Ingredient("salt", {
     "calories": 0, "protein": 0.0, "fat": 0.0, "carbs": 0.0, "sodium": 38758,
@@ -33,14 +36,17 @@ ingredients = [sardine, olive_oil, salt]
 true_w = {"sardines (raw)": 90.0, "olive oil": 22.0, "salt": 1.2}
 basis = sum(true_w.values())
 
-# forward-compute the true panel, then round it FDA-style to make the label
+# forward-compute the true panel, then round it FDA-style to make the label.
+# Ingredient profiles are keyed by canonical nutrient id, so resolve the names
+# we want on the panel first.
 raw_panel = {}
 for nut in ["calories", "protein", "fat", "carbs", "sodium"]:
-    raw_panel[nut] = sum(ing.per_100g.get(nut, 0) * true_w[ing.name] / 100 for ing in ingredients)
+    nid = REG[nut].id
+    raw_panel[nut] = sum(ing.amount(nid, true_w[ing.name]) for ing in ingredients)
 
 def fda_round(nut, v):
     # emulate the printed value: round to the class step
-    cls = US_FDA.classify(nut)
+    cls = US_FDA.classify(REG[nut])
     if cls == "energy":
         step = 5 if v <= 50 else 10
     elif cls == "gram_macro":
@@ -70,9 +76,10 @@ for name, w in sol.weights_g.items():
 print("Residual vs label band:  ", {k: round(v, 3) for k, v in sol.residuals.items()})
 print("-" * 66)
 print("Reconstructed micros/FA the label never listed:")
-for k in ["calcium", "vitamin_d_iu", "epa", "dha", "vitamin_e", "oleic"]:
-    if k in sol.reconstructed:
-        print(f"  {k:16s} {sol.reconstructed[k]:8.2f}")
+named = sol.reconstructed_named()
+for k in ["Calcium", "Vitamin D", "EPA", "DHA", "Vitamin E", "Monounsaturated"]:
+    if k in named:
+        print(f"  {k:18s} {named[k]:8.2f}")
 print("-" * 66)
 print("MCP custom-food payload:")
 import json

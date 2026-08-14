@@ -113,6 +113,17 @@ def solve(
     bounds = [(0.0, None)] * n
     notes: list[str] = []
 
+    # A constrained nutrient no ingredient supplies can't bind anything, so it
+    # drops out of the fit. Say so: it usually means a base profile is missing
+    # data the label declares (potassium, say), and a silently ignored
+    # constraint looks identical to a satisfied one.
+    ignored = sorted(set(iv) - exclude - set(nutrients))
+    if ignored:
+        notes.append(
+            "no ingredient supplies these constrained nutrients, so they were "
+            f"left out of the fit: {ignored}. Their residuals are still reported."
+        )
+
     feas = linprog(
         np.zeros(n),
         A_ub=A_ub,

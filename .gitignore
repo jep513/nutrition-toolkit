@@ -8,3 +8,4 @@ build/
 .idea/
 .ruff_cache/
 .claude/settings.local.json
+scripts/

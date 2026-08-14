@@ -158,6 +158,26 @@ def test_solve_accepts_bare_intervals():
     assert abs(sol.weights_g["b"] - 50.0) < 1.0
 
 
+def test_constraint_no_ingredient_supplies_is_reported_not_silently_dropped():
+    """A label nutrient none of the base profiles carries can't bind anything.
+    Dropping it quietly makes an ignored constraint look like a satisfied one,
+    which in practice means a base profile is missing data the label declares."""
+    a = Ingredient("a", {"protein": 20})
+    b = Ingredient("b", {"fat": 100})
+
+    sol = solve_label(
+        [a, b],
+        # nothing here carries potassium
+        Label({"protein": 10, "fat": 50, "potassium": 100}, basis_g=100),
+        respect_order=False,
+    )
+
+    assert sol.feasible
+    assert any("no ingredient supplies" in n and "306" in n for n in sol.notes)
+    # still reported, so the miss is visible
+    assert sol.residuals[306] != 0.0
+
+
 def test_excluded_nutrient_still_reports_residual():
     """Energy is kept out of the fit but still checked -- that's what makes it
     a cross-check rather than dead weight."""

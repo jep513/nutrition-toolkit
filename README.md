@@ -8,18 +8,27 @@ Example: a tin of *sardines, olive oil, salt* with a panel showing protein / fat
 
 | Package | Does |
 |---|---|
+| `nutrients/` | Canonical nutrient registry: ids, units, solubility, mass/energy roles, and how nutrients aggregate into one another |
 | `labels/` | Turns a printed panel into true-value intervals, per jurisdiction (`regimes/us_fda.py` today; EU/Canada/AU-NZ are the natural next ones) |
-| `recipe_deformulation/` | Takes intervals + per-100 g ingredient profiles, returns gram weights with honest ranges |
+| `recipe_deformulation/` | Takes intervals + per-100 g ingredient profiles, returns gram weights with honest ranges, plus the reconstructed profile as a `NutrientVector` |
 | `adapters/` | Per-app I/O shaping. The only place any nutrition tracker is named |
 
-The subpackages don't import each other. `labels` produces `nutrient -> (low, high)`;
+The subpackages don't import each other. `labels` produces `nutrient id -> (low, high)`;
 `recipe_deformulation` consumes it and has no notion of a label, so intervals can
 equally come from another regime, a lab assay, or a hand-written tolerance.
 `nutrition_toolkit.solve_label` is the wiring.
 
-Planned: `nutrients/` (canonical nutrient IDs, units, fat-solubility) and `derive/`
-(retention/yield transforms, per-nutrient overrides, and re-deriving when a base
-food changes).
+Nutrient identity is integer ids, not names -- specs and Python calls accept
+friendly names (`protein`, `epa`, `vitamin_d`) and resolve them through the
+registry, raising with a suggestion on a typo rather than silently carrying it. Ids below 1000 follow USDA SR/FDC
+numbering (which Cronometer adopted); ids from 900001 are toolkit-assigned for
+nutrients with no settled USDA number. A `NutrientVector` is **always** in each
+nutrient's canonical unit -- conversion happens at the edges, so IU/mass mix-ups
+can't propagate inward. Vitamin D converts cleanly (40 IU/ug); vitamins A and E
+*refuse* to convert, because their IU factor depends on the chemical form.
+
+Planned: `derive/` -- retention/yield transforms, per-nutrient overrides, and
+re-deriving a food when its base changes.
 
 ## Why it's not just "solve Ax = b"
 

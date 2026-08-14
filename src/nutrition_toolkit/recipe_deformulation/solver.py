@@ -23,6 +23,7 @@ from collections.abc import Iterable, Mapping
 import numpy as np
 from scipy.optimize import linprog, minimize
 
+from ..nutrients import NutrientVector
 from .models import Ingredient, Solution
 
 
@@ -77,20 +78,20 @@ def _constraints(A, iv, nutrients, n, respect_order, basis_g, total_mode):
 
 def solve(
     ingredients: list[Ingredient],
-    intervals: Mapping[str, tuple[float, float]],
+    intervals: Mapping[int, tuple[float, float]],
     *,
     basis_g: float | None = None,
     respect_order: bool = True,
     total_mode: str = "eq",  # "eq" | "max" | "free"
-    exclude: Iterable[str] = (),
+    exclude: Iterable[int] = (),
 ) -> Solution:
     """Solve for ingredient weights consistent with `intervals`.
 
     Args:
         ingredients: Components in label order (heaviest first) with per-100 g
             nutrient profiles.
-        intervals: nutrient -> (low, high) bounds on the total amount in the
-            basis. Typically `PanelReading.intervals`.
+        intervals: canonical nutrient id -> (low, high) bounds on the total
+            amount in the basis. Typically `PanelReading.intervals`.
         basis_g: Known total mass, applied per `total_mode`.
         respect_order: Enforce w_1 >= w_2 >= ... (regulated ingredient order).
         total_mode: "eq" (mass known exactly), "max" (mass is an upper bound,
@@ -201,17 +202,19 @@ def solve(
     # nutrients are reported too -- that's what makes energy a cross-check.
     residuals = {}
     for nut, (lo, hi) in iv.items():
-        y = sum(
-            ing.per_100g.get(nut, 0.0) * w[i] / 100.0 for i, ing in enumerate(ingredients)
-        )
+        y = sum(ing.amount(nut, w[i]) for i, ing in enumerate(ingredients))
         residuals[nut] = 0.0 if lo <= y <= hi else (y - hi if y > hi else y - lo)
 
     # full reconstructed profile over every nutrient any ingredient carries
     all_keys = sorted({k for ing in ingredients for k in ing.per_100g})
-    reconstructed = {
-        k: sum(ing.per_100g.get(k, 0.0) * w[i] / 100.0 for i, ing in enumerate(ingredients))
-        for k in all_keys
-    }
+    total_g = float(np.sum(w))
+    reconstructed = NutrientVector(
+        {
+            k: sum(ing.amount(k, w[i]) for i, ing in enumerate(ingredients))
+            for k in all_keys
+        },
+        basis_g=total_g,
+    )
     return Solution(
         feasible=bool(feasible),
         weights_g={ing.name: float(w[i]) for i, ing in enumerate(ingredients)},

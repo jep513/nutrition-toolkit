@@ -50,6 +50,18 @@ def test_deformulation_does_not_import_labels():
     )
 
 
+def test_nutrients_is_the_base_layer():
+    """nutrients/ is what everything else keys off, so it depends on nothing
+    above it. If it ever needs a label or a solver, the dependency is upside
+    down."""
+    imported = _imported_modules(SRC / "nutrients")
+
+    for forbidden in ("labels", "recipe_deformulation", "adapters"):
+        assert not any(forbidden in m for m in imported), (
+            f"nutrients must not depend on {forbidden}; found {sorted(imported)}"
+        )
+
+
 def test_labels_does_not_import_deformulation():
     """...and the dependency doesn't run the other way either."""
     imported = _imported_modules(SRC / "labels")

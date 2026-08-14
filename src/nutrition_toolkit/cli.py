@@ -94,7 +94,8 @@ def main(argv=None) -> int:
         # Ranges are NaN when the polytope was empty and we fell back to best-fit.
         rng = "" if math.isnan(lo) else f"   range [{lo:.2f}, {hi:.2f}]"
         print(f"  {name:24s} {w:8.2f}{rng}")
-    off = {k: round(v, 3) for k, v in sol.residuals.items() if abs(v) > 1e-6}
+    named = sol.residuals_named()
+    off = {k: round(v, 3) for k, v in named.items() if abs(v) > 1e-6}
     # ASCII only: this lands on a cp1252 console under Windows.
     print(f"\nlabel misses (outside band): {off or 'none - all nutrients inside rounding'}")
     print(f"\n{args.adapter} payload:")

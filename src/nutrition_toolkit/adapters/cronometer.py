@@ -21,10 +21,24 @@ optional extra so the core stays installable without it.
 
 from __future__ import annotations
 
+import json
+import os
+import pathlib
 from collections.abc import Mapping
 
 from ..nutrients import NutrientVector, Registry, UnitConversionError, load_registry
 from ..recipe_deformulation import Solution
+
+# Fetched food payloads, cached on disk so repeat solves stay off the network
+# and out of Cronometer's login rate limit. Foods change rarely; call
+# fetch_profile(..., refresh=True) when one does.
+_CACHE_PATH = (
+    pathlib.Path(os.getenv("XDG_CACHE_HOME") or pathlib.Path.home() / ".cache")
+    / "nutrition-toolkit"
+    / "cronometer-foods.json"
+)
+
+_client = None
 
 
 def to_cronometer_nutrients(
@@ -94,6 +108,88 @@ def to_cronometer_custom_food(
         payload["serving_grams"] = serving_g
         payload["servings_in_basis"] = round(payload["basis_grams"] / serving_g, 3)
     return payload
+
+
+class CronometerUnavailableError(RuntimeError):
+    """The Cronometer client isn't installed, or credentials are missing."""
+
+
+def _client_or_raise():
+    """The authenticated client, imported lazily.
+
+    Deliberately not a module-level import: the base package installs without
+    a Cronometer client, and everything except live fetching works without one.
+    """
+    global _client
+    if _client is None:
+        try:
+            from cronometer_api_mcp.client import CronometerClient
+        except ImportError as exc:
+            raise CronometerUnavailableError(
+                "live fetching needs the Cronometer client: "
+                'pip install "nutrition-toolkit[cronometer]"'
+            ) from exc
+        if not os.getenv("CRONOMETER_USERNAME") or not os.getenv(
+            "CRONOMETER_PASSWORD"
+        ):
+            raise CronometerUnavailableError(
+                "CRONOMETER_USERNAME and CRONOMETER_PASSWORD must be set"
+            )
+        _client = CronometerClient()
+    return _client
+
+
+def _read_cache() -> dict[str, dict]:
+    try:
+        return json.loads(_CACHE_PATH.read_text(encoding="utf-8"))
+    except (FileNotFoundError, OSError, json.JSONDecodeError):
+        return {}
+
+
+def _write_cache(cache: Mapping[str, dict]) -> None:
+    try:
+        _CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        _CACHE_PATH.write_text(
+            json.dumps(cache, ensure_ascii=False), encoding="utf-8"
+        )
+    except OSError:
+        pass  # a cache that won't persist is not worth failing a solve over
+
+
+def fetch_food(food_id: int, *, refresh: bool = False) -> dict:
+    """The raw Cronometer food payload, cached on disk."""
+    cache = _read_cache()
+    key = str(food_id)
+    if refresh or key not in cache:
+        cache[key] = _client_or_raise().get_food(food_id)
+        _write_cache(cache)
+    return cache[key]
+
+
+def fetch_profile(
+    food_id: int, *, refresh: bool = False, registry: Registry | None = None
+) -> NutrientVector:
+    """Canonical per-100 g profile for a Cronometer food id.
+
+    Refuses recipe-type foods: their nutrients are stored per serving rather
+    than per 100 g, so using one as an ingredient would scale everything wrong
+    without any visible symptom.
+    """
+    food = fetch_food(food_id, refresh=refresh)
+    measures = food.get("measures") or []
+    if any(
+        isinstance(m, Mapping) and m.get("type") == "Recipe" for m in measures
+    ):
+        raise ValueError(
+            f"food {food_id} ({food.get('name')!r}) is a recipe: its nutrients "
+            "are per serving, not per 100 g. Use a base database food instead."
+        )
+    return from_cronometer_food(food, registry)
+
+
+def food_name(food_id: int) -> str:
+    """Display name for a fetched food, for labelling solved weights."""
+    return str(fetch_food(food_id).get("name") or f"food {food_id}")
 
 
 def from_cronometer_food(

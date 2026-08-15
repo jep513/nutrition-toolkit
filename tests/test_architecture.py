@@ -71,27 +71,53 @@ def test_labels_does_not_import_deformulation():
     )
 
 
-def test_only_adapters_name_a_tracker():
-    """No nutrition tracker is named outside adapters/.
+# The packages that hold the nutrient maths. These must stay app-neutral so
+# supporting another tracker is a new file in adapters/ and nothing else.
+# `mcp/`, `cli.py` and the package root are composition layers: they exist to
+# wire things together and may legitimately know a tracker exists.
+CORE_PACKAGES = ("nutrients", "labels", "recipe_deformulation")
 
-    Keeps the core app-neutral, so supporting another tracker is a new file in
-    adapters/ and nothing else.
+
+def _imports_naming(path: pathlib.Path, needle: str) -> bool:
+    """Whether this module imports anything whose name mentions `needle`.
+
+    Docstrings may name a tracker freely; imports are what create coupling.
     """
-    offenders = []
-    for path in SRC.rglob("*.py"):
-        if "adapters" in path.relative_to(SRC).parts:
-            continue
-        # Docstrings may mention a tracker by name; imports may not.
-        for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
-            if isinstance(node, ast.Import | ast.ImportFrom):
-                names = [a.name for a in node.names]
-                if isinstance(node, ast.ImportFrom):
-                    names.append(node.module or "")
-                # The package root is allowed to re-export the adapter.
-                is_package_root = path.name == "__init__.py" and path.parent == SRC
-                if not is_package_root and any(
-                    "cronometer" in (n or "").lower() for n in names
-                ):
-                    offenders.append(str(path.relative_to(SRC)))
+    for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+        if isinstance(node, ast.Import | ast.ImportFrom):
+            names = [a.name for a in node.names]
+            if isinstance(node, ast.ImportFrom):
+                names.append(node.module or "")
+            if any(needle in (n or "").lower() for n in names):
+                return True
+    return False
 
-    assert not offenders, f"tracker named outside adapters/: {offenders}"
+
+def test_core_packages_name_no_tracker():
+    """The maths knows nothing about any nutrition app."""
+    offenders = [
+        str(path.relative_to(SRC))
+        for package in CORE_PACKAGES
+        for path in (SRC / package).rglob("*.py")
+        if _imports_naming(path, "cronometer")
+    ]
+
+    assert not offenders, f"tracker named inside the core packages: {offenders}"
+
+
+def test_only_adapters_import_the_vendor_client():
+    """The third-party client is reachable through adapters/ and nowhere else.
+
+    Composition layers may name Cronometer -- the MCP server has to, since it
+    resolves food ids -- but they go through the adapter rather than importing
+    the vendor SDK, so the conversion of ids and units happens in exactly one
+    place and swapping the client is a one-file change.
+    """
+    offenders = [
+        str(path.relative_to(SRC))
+        for path in SRC.rglob("*.py")
+        if "adapters" not in path.relative_to(SRC).parts
+        and _imports_naming(path, "cronometer_api_mcp")
+    ]
+
+    assert not offenders, f"vendor client imported outside adapters/: {offenders}"

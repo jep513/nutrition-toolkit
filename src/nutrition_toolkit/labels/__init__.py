@@ -63,9 +63,11 @@ def read_panel(
             nutrient = registry.get(nid)
             band = regime.percent_dv_interval(nutrient, printed_pct)
             if band is None:
+                caveat = regime.percent_dv_caveat(nutrient)
+                reason = caveat or f"no Daily Value under {regime.name}"
                 notes.append(
-                    f"no Daily Value for {registry.name_for(nid)} under "
-                    f"{regime.name}; its {printed_pct}% declaration was ignored"
+                    f"{registry.name_for(nid)}: {printed_pct}% declaration "
+                    f"ignored -- {reason}"
                 )
                 continue
             existing = intervals.get(nid)

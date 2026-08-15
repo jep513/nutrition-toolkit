@@ -54,7 +54,17 @@ class Regime(Protocol):
         reference values are jurisdiction-specific (US Daily Values vs EU
         Nutrient Reference Values), so both live with the regime.
 
-        Returns None when this regime has no reference value for the nutrient.
+        Returns None when this regime has no reference value for the nutrient,
+        or when the percentage isn't a plain fraction of the declared amount.
+        """
+        ...
+
+    def percent_dv_caveat(self, nutrient: Nutrient | None) -> str | None:
+        """Why this nutrient's %DV can't be turned into an amount, if it can't.
+
+        Distinct from having no reference value at all: a regime may define one
+        and still forbid inverting it, as the US does for protein because the
+        figure is corrected for protein quality.
         """
         ...
 

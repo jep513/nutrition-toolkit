@@ -29,6 +29,19 @@ ENERGY_ID = 208
 _DV_PACKAGE = "nutrition_toolkit.labels.regimes.data"
 _DV_FILE = "us_fda_daily_values.json"
 
+PROTEIN_ID = 203
+
+# Nutrients whose %DV figure is not a plain fraction of the declared amount,
+# so inverting it would contradict the amount printed beside it.
+PERCENT_DV_UNINVERTIBLE: dict[int, str] = {
+    PROTEIN_ID: (
+        "protein %DV is corrected for protein quality (PDCAAS) under 21 CFR "
+        "101.9(c)(7), so it reflects digestible protein rather than the "
+        "declared amount -- a peanut product can print 7 g and 8% DV against a "
+        "50 g DV, which as a raw fraction would be 14%"
+    ),
+}
+
 
 @lru_cache(maxsize=1)
 def daily_values() -> dict[int, tuple[float, str]]:
@@ -125,14 +138,26 @@ class USFDARegime:
             return 5.0
         return 10.0
 
+    def percent_dv_caveat(self, nutrient: Nutrient | None) -> str | None:
+        """Why this nutrient's %DV can't be turned into an amount, if it can't.
+
+        Distinct from simply having no Daily Value: protein has one, but its
+        percentage is quality-corrected, so the arithmetic that works for every
+        other nutrient gives the wrong answer here.
+        """
+        if nutrient is None:
+            return None
+        return PERCENT_DV_UNINVERTIBLE.get(nutrient.id)
+
     def percent_dv_interval(
         self, nutrient: Nutrient | None, printed_pct: float
     ) -> tuple[float, float] | None:
         """Absolute (low, high) bounds implied by a %DV figure.
 
-        Returns None when the nutrient has no Daily Value or the DV is stated
-        in a unit that can't be converted to canonical -- better to drop the
-        constraint than to invent one.
+        Returns None when the nutrient has no Daily Value, when the DV is
+        stated in a unit that can't be converted to canonical, or when the
+        percentage isn't a plain fraction of the declared amount (protein) --
+        better to drop the constraint than to invent one.
 
         Usually looser than a printed amount: "Calcium 2%" against a 1300 mg DV
         means anywhere from 13 to 39 mg. Not always, though -- the absolute
@@ -140,7 +165,7 @@ class USFDARegime:
         iron to 0.36-0.72 mg while "Iron 1mg" pins it only to 0-5 mg. That's
         why read_panel intersects the two rather than preferring either.
         """
-        if nutrient is None:
+        if nutrient is None or nutrient.id in PERCENT_DV_UNINVERTIBLE:
             return None
         entry = daily_values().get(nutrient.id)
         if entry is None:

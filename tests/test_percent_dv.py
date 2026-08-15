@@ -18,6 +18,7 @@ from nutrition_toolkit.nutrients import load_registry
 
 REG = load_registry()
 CALCIUM, IRON, POTASSIUM, VITAMIN_D, ALLULOSE = 301, 303, 306, 324, 900010
+PROTEIN = 203
 
 
 # ---------------------------------------------------------------------------
@@ -140,6 +141,34 @@ def test_percentage_for_a_nutrient_with_no_dv_is_reported():
 
     assert ALLULOSE not in reading.intervals
     assert any("no Daily Value" in n for n in reading.notes)
+
+
+# ---------------------------------------------------------------------------
+# Protein: the %DV is quality-corrected, so it can't be inverted.
+# ---------------------------------------------------------------------------
+
+
+def test_protein_percent_dv_is_refused():
+    """A real peanut butter panel prints "Protein 7g / 8%". Against the 50 g DV
+    a raw fraction would be 14%; the 8% is PDCAAS-corrected for protein
+    quality. Inverting it would imply 3.75-4.25 g and contradict the 7 g
+    printed alongside it."""
+    assert US_FDA.percent_dv_interval(REG["protein"], 8) is None
+    assert "PDCAAS" in US_FDA.percent_dv_caveat(REG["protein"])
+
+
+def test_protein_percentage_does_not_corrupt_the_printed_amount():
+    reading = read_panel(Label({"protein": 7}, percent_dv={"protein": 8}))
+
+    # the printed grams survive untouched
+    assert reading.intervals[PROTEIN] == (6.5, 7.5)
+    assert any("PDCAAS" in n for n in reading.notes)
+
+
+def test_other_nutrients_still_invert_normally():
+    """The refusal is protein-specific, not a blanket retreat."""
+    assert US_FDA.percent_dv_caveat(REG["calcium"]) is None
+    assert US_FDA.percent_dv_interval(REG["calcium"], 2) == (13.0, 39.0)
 
 
 # ---------------------------------------------------------------------------

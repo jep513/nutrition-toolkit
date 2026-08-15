@@ -45,6 +45,19 @@ class Regime(Protocol):
         """Return (low, high) true-value bounds for one printed number."""
         ...
 
+    def percent_dv_interval(
+        self, nutrient: Nutrient | None, printed_pct: float
+    ) -> tuple[float, float] | None:
+        """Absolute (low, high) bounds implied by a percent-Daily-Value figure.
+
+        %DV is rounded to coarser increments than absolute amounts, and the
+        reference values are jurisdiction-specific (US Daily Values vs EU
+        Nutrient Reference Values), so both live with the regime.
+
+        Returns None when this regime has no reference value for the nutrient.
+        """
+        ...
+
     def is_derived(self, nutrient: Nutrient | None) -> bool:
         """True if this nutrient is computed from other declared nutrients.
 

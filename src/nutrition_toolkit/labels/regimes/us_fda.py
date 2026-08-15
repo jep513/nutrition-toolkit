@@ -17,11 +17,32 @@ through to a default without anyone noticing.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping
+from functools import lru_cache
+from importlib import resources
 
-from ...nutrients import Nutrient, Registry
+from ...nutrients import Nutrient, Registry, UnitConversionError
 
 ENERGY_ID = 208
+
+_DV_PACKAGE = "nutrition_toolkit.labels.regimes.data"
+_DV_FILE = "us_fda_daily_values.json"
+
+
+@lru_cache(maxsize=1)
+def daily_values() -> dict[int, tuple[float, str]]:
+    """Canonical nutrient id -> (Daily Value, unit), per 21 CFR 101.9.
+
+    Loaded lazily: a regime instance is built at import time and most callers
+    never touch %DV.
+    """
+    text = resources.files(_DV_PACKAGE).joinpath(_DV_FILE).read_text("utf-8")
+    doc = json.loads(text)
+    return {
+        int(row["id"]): (float(row["value"]), str(row["unit"]))
+        for row in doc["daily_values"]
+    }
 
 
 class USFDARegime:
@@ -85,6 +106,58 @@ class USFDARegime:
         # generic: symmetric relative tolerance, min 1 unit absolute
         pad = max(abs(v) * self.rel_tol, 1.0)
         return (max(0.0, v - pad), v + pad)
+
+    # -- percent Daily Value ------------------------------------------------
+
+    @staticmethod
+    def percent_dv_step(printed_pct: float) -> float:
+        """The increment a %DV figure was rounded to.
+
+        21 CFR 101.9(c)(8)(iii): to the nearest 2% up to and including 10%,
+        the nearest 5% above 10% and up to and including 50%, and the nearest
+        10% above 50%. Coarser than the absolute-amount rules, which is the
+        whole reason a %DV-only declaration is a weak constraint.
+        """
+        v = float(printed_pct)
+        if v <= 10:
+            return 2.0
+        if v <= 50:
+            return 5.0
+        return 10.0
+
+    def percent_dv_interval(
+        self, nutrient: Nutrient | None, printed_pct: float
+    ) -> tuple[float, float] | None:
+        """Absolute (low, high) bounds implied by a %DV figure.
+
+        Returns None when the nutrient has no Daily Value or the DV is stated
+        in a unit that can't be converted to canonical -- better to drop the
+        constraint than to invent one.
+
+        Usually looser than a printed amount: "Calcium 2%" against a 1300 mg DV
+        means anywhere from 13 to 39 mg. Not always, though -- the absolute
+        rule for a nutrient under 5 mg collapses to [0, 5], so "Iron 3%" pins
+        iron to 0.36-0.72 mg while "Iron 1mg" pins it only to 0-5 mg. That's
+        why read_panel intersects the two rather than preferring either.
+        """
+        if nutrient is None:
+            return None
+        entry = daily_values().get(nutrient.id)
+        if entry is None:
+            return None
+        dv_value, dv_unit = entry
+
+        if dv_unit != nutrient.unit:
+            try:
+                dv_value = nutrient.to_canonical(dv_value, dv_unit)
+            except UnitConversionError:
+                return None
+
+        v = float(printed_pct)
+        step = self.percent_dv_step(v)
+        lo_pct = max(0.0, v - step / 2)
+        hi_pct = v + step / 2
+        return (lo_pct / 100.0 * dv_value, hi_pct / 100.0 * dv_value)
 
 
 US_FDA = USFDARegime()

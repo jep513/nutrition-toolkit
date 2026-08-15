@@ -50,6 +50,39 @@ def read_panel(
         if regime.is_derived(nutrient):
             derived.add(nid)
 
+    # Percent-DV declarations. Where a nutrient is declared both ways the two
+    # bands must overlap; intersecting keeps whichever is tighter without
+    # needing a precedence rule. That matters because it isn't always the
+    # printed amount -- under 5 mg the absolute rule collapses to [0, 5], so a
+    # percentage can be the sharper of the two. An empty intersection means
+    # the panel disagrees with itself, which is worth saying out loud.
+    if label.percent_dv:
+        pct_amounts, pct_notes = regime.normalize_declared(label.percent_dv, registry)
+        notes.extend(pct_notes)
+        for nid, printed_pct in pct_amounts.items():
+            nutrient = registry.get(nid)
+            band = regime.percent_dv_interval(nutrient, printed_pct)
+            if band is None:
+                notes.append(
+                    f"no Daily Value for {registry.name_for(nid)} under "
+                    f"{regime.name}; its {printed_pct}% declaration was ignored"
+                )
+                continue
+            existing = intervals.get(nid)
+            if existing is None:
+                intervals[nid] = band
+                continue
+            lo, hi = max(existing[0], band[0]), min(existing[1], band[1])
+            if lo > hi:
+                notes.append(
+                    f"{registry.name_for(nid)}: printed amount implies "
+                    f"{existing[0]:g}-{existing[1]:g} but {printed_pct}% DV implies "
+                    f"{band[0]:g}-{band[1]:g}; they don't overlap, keeping the "
+                    f"printed amount"
+                )
+            else:
+                intervals[nid] = (lo, hi)
+
     unknown = registry.unknown_ids(intervals)
     if unknown:
         notes.append(

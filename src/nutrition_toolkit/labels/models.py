@@ -24,8 +24,17 @@ class Label:
                 ingredients actually sum to). If None, total mass is left free.
     """
 
-    values: dict[int | str, float]
+    values: dict[int | str, float] = field(default_factory=dict)
     basis_g: float | None = None
+    percent_dv: dict[int | str, float] = field(default_factory=dict)
+    """Nutrients declared only as a percent of Daily Value.
+
+    Many panels give vitamin D, calcium, iron and potassium as a bare
+    percentage, and older-format labels do the same for vitamins A and C.
+    %DV is rounded to much coarser increments than absolute amounts, so these
+    are weak constraints -- "Calcium 2%" pins calcium only to somewhere in
+    13-39 mg. Declare a nutrient in both places when the panel prints both;
+    the reading intersects them and the tighter one wins."""
 
 
 @dataclass

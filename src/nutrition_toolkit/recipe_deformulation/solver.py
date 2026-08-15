@@ -76,6 +76,44 @@ def _constraints(A, iv, nutrients, n, respect_order, basis_g, total_mode):
     )
 
 
+def is_feasible(
+    ingredients: list[Ingredient],
+    intervals: Mapping[int, tuple[float, float]],
+    *,
+    basis_g: float | None = None,
+    respect_order: bool = True,
+    total_mode: str = "eq",
+    exclude: Iterable[int] = (),
+) -> bool:
+    """Whether any weight vector satisfies these constraints.
+
+    Just the linear-programming feasibility test -- no per-weight ranges, no
+    representative point. Cheap enough to call in a loop, which is what the
+    conflict search does.
+    """
+    n = len(ingredients)
+    nutrients = _select_nutrients(ingredients, intervals, frozenset(exclude))
+    basis = basis_g if total_mode != "free" else None
+    if not nutrients:
+        # Nothing binds the weights except mass and order, which are always
+        # satisfiable for non-negative weights.
+        return True
+    A = _matrix(ingredients, nutrients)
+    A_ub, b_ub, A_eq, b_eq = _constraints(
+        A, dict(intervals), nutrients, n, respect_order, basis, total_mode
+    )
+    result = linprog(
+        np.zeros(n),
+        A_ub=A_ub,
+        b_ub=b_ub,
+        A_eq=A_eq,
+        b_eq=b_eq,
+        bounds=[(0.0, None)] * n,
+        method="highs",
+    )
+    return bool(result.success)
+
+
 def solve(
     ingredients: list[Ingredient],
     intervals: Mapping[int, tuple[float, float]],

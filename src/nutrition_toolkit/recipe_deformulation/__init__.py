@@ -7,7 +7,15 @@ notion of a nutrition label; see `nutrition_toolkit.labels`.
 
 from __future__ import annotations
 
+from .conflict import Conflict, find_conflict
 from .models import Ingredient, Solution
-from .solver import solve
+from .solver import is_feasible, solve
 
-__all__ = ["Ingredient", "Solution", "solve"]
+__all__ = [
+    "Conflict",
+    "Ingredient",
+    "Solution",
+    "find_conflict",
+    "is_feasible",
+    "solve",
+]

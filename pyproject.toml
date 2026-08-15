@@ -17,9 +17,19 @@ dependencies = [
 
 [project.optional-dependencies]
 cli = ["pyyaml>=6.0"]
+# Live ingredient lookup. The client requires Python >=3.14 (it uses PEP 758
+# except syntax), so it's marked rather than raising this project's floor --
+# the pure-math core stays installable on 3.10. Below 3.14 the extra installs
+# without the client and live fetching raises CronometerUnavailableError.
+cronometer = [
+    "cronometer-api-mcp>=0.1.0; python_version >= '3.14'",
+    "python-dotenv>=1.0.0",
+]
+mcp = ["mcp>=1.29.0,<2", "python-dotenv>=1.0.0"]
 
 [project.scripts]
 recipe-deformulate = "nutrition_toolkit.cli:main"
+nutrition-toolkit-mcp = "nutrition_toolkit.mcp.server:main"
 
 [dependency-groups]
 dev = [
